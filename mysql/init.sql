@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS orders_db;
+CREATE DATABASE IF NOT EXISTS products_db;
+CREATE DATABASE IF NOT EXISTS users_db;
+
+CREATE USER IF NOT EXISTS 'orders'@'%' IDENTIFIED BY 'orderspass';
+CREATE USER IF NOT EXISTS 'products'@'%' IDENTIFIED BY 'productspass';
+CREATE USER IF NOT EXISTS 'users'@'%' IDENTIFIED BY 'userspass';
+
+GRANT ALL PRIVILEGES ON orders_db.* TO 'orders'@'%';
+GRANT ALL PRIVILEGES ON products_db.* TO 'products'@'%';
+GRANT ALL PRIVILEGES ON users_db.* TO 'users'@'%';
+
+FLUSH PRIVILEGES;
