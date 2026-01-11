@@ -1,0 +1,49 @@
+services:
+  php:
+    build:
+      context: ../user-service
+      dockerfile: ../user-service/Dockerfile
+    volumes:
+      - ../user-service/:/var/www/html
+      - laravel_storage:/var/www/html/storage
+      - laravel_cache:/var/www/html/bootstrap/cache
+
+  web:
+    image: nginx:1.28.1
+    working_dir: /var/www/html
+    volumes:
+      - ../user-service:/var/www/html
+      - ./nginx/nginx_template_local.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - php
+
+#  node:
+#    image: node:25
+#    user: "${UID}:${GID}"
+#    working_dir: /assets
+#    volumes:
+#      - ./:/assets
+#    command: npm run dev
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpass"
+      MYSQL_DATABASE: "cloudshopt_users"
+      MYSQL_USER: "cloudshoptuser"
+      MYSQL_PASSWORD: "cloudshoptpassword"
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+  redis:
+    image: redis:8
+    volumes:
+      - redisdata:/data
+
+volumes:
+  laravel_storage:
+  laravel_cache:
+  mysqldata:
+  redisdata:
