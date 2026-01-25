@@ -81,10 +81,10 @@ spec:
               containerPort: 9000
               protocol: TCP
           env:
-            - name: APP_ENV
-              value: {{ .Values.env.APP_ENV | quote }}
-            - name: APP_DEBUG
-              value: {{ .Values.env.APP_DEBUG | quote }}
+            {{- range $k, $v := .Values.env }}
+              - name: {{ $k }}
+                value: {{ $v | quote }}
+            {{- end }}
           envFrom:
             - secretRef:
                 name: {{ .Values.existingSecretName }}

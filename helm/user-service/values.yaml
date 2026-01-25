@@ -62,19 +62,18 @@ appCode:
   sourcePath: /var/www/html
   mountPath: /var/www/html
 
-createSecret: false
 existingSecretName: user-service-secrets
 
 env:
   APP_ENV: production
-  APP_DEBUG: false
+  APP_DEBUG: "false"
   APP_KEY: "base64:hZh8hHHPBmtccIKPnGKePjHRXwuLZr2EWXQ3xL2lNN8="
   DB_CONNECTION: "mysql"
-  DB_HOST: "cloudshopt-mysql"
+  DB_HOST: "cloudshopt-mysql.cloudshopt.svc.cluster.local"
   DB_PORT: "3306"
   DB_DATABASE: "cloudshopt_users"
   DB_USERNAME: "users"
-  REDIS_HOST: "cloudshopt-redis-master"
+  REDIS_HOST: "cloudshopt-redis-master.cloudshopt.svc.cluster.local"
   REDIS_PORT: "6379"
 
 probes:
