@@ -79,7 +79,7 @@ env:
 probes:
   readiness:
     enabled: true
-    path: /api/health
+    path: /
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 2
@@ -88,7 +88,7 @@ probes:
 
   liveness:
     enabled: true
-    path: /api/health
+    path: /
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 2
