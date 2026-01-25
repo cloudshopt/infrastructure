@@ -39,3 +39,11 @@ helm upgrade --install cloudshopt-redis oci://registry-1.docker.io/bitnamicharts
 -f helm/redis-secrets.yaml
 ```
 
+## Dev vs main
+imamo dva namespace-a *cloudshopt* in *cloudshopt-dev*
+
+dev:
+users-dev.timotejblazic.eu
+
+main (prod):
+users.timotejblazic.eu
