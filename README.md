@@ -39,22 +39,3 @@ helm upgrade --install cloudshopt-redis oci://registry-1.docker.io/bitnamicharts
 -f helm/redis-secrets.yaml
 ```
 
-### Create users database + user
-```
-kubectl -n cloudshopt exec -it cloudshopt-mysql-0 -- bash
-```
-
-```
-CREATE DATABASE cloudshopt_users CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'users'@'%' IDENTIFIED BY 'CHANGE_ME_USERS_DB_PASS';
-GRANT ALL PRIVILEGES ON users.* TO 'users'@'%';
-FLUSH PRIVILEGES;
-```
-
-### Install user-service with secrets
-
-```
-helm upgrade --install user-service ./helm/user-service -n cloudshopt \
--f helm/user-service/values.yaml \
--f helm/user-service-secrets.yaml
-```
