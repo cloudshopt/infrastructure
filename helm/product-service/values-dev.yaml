@@ -6,7 +6,7 @@ replicaCount: 1
 
 images:
   app:
-    repository: timib22/cloudshopt-product-php
+    repository: timib22/cloudshopt-products-php
     tag: "0.0.1"
     pullPolicy: IfNotPresent
   nginx:
