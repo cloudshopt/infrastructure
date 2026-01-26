@@ -19,6 +19,16 @@ services:
       - products_storage:/var/www/html/storage
       - products_cache:/var/www/html/bootstrap/cache
 
+  php_orders:
+    build:
+      context: ../order-service
+      dockerfile: ../order-service/Dockerfile
+    volumes:
+      - ../order-service/:/var/www/html
+      - ../order-service/:/srv/order-service
+      - orders_storage:/var/www/html/storage
+      - orders_cache:/var/www/html/bootstrap/cache
+
   web:
     image: nginx:1.28.1
     ports:
@@ -26,10 +36,12 @@ services:
     volumes:
       - ../user-service:/srv/user-service
       - ../product-service:/srv/product-service
+      - ../order-service:/srv/order-service
       - ./nginx/nginx_template_local.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php_users
       - php_products
+      - php_orders
 
   db:
     image: mysql:8
@@ -51,5 +63,7 @@ volumes:
   users_cache:
   products_storage:
   products_cache:
+  orders_storage:
+  orders_cache:
   mysqldata:
   redisdata:
