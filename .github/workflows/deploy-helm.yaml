@@ -1,0 +1,163 @@
+name: Deploy Helm to AKS (via kubeconfig)
+
+on:
+  workflow_call:
+    inputs:
+      prod_branch:
+        type: string
+        default: main
+
+      # Infrastructure repo (charts)
+      infra_repo:
+        type: string
+        default: cloudshopt/infrastructure
+      infra_ref:
+        type: string
+        default: main
+
+      # Helm
+      helm_chart_path:
+        type: string
+        required: true
+      values_prod:
+        type: string
+        required: true
+      values_dev:
+        type: string
+        required: true
+
+      # K8s routing
+      namespace_prod:
+        type: string
+        required: true
+      namespace_dev:
+        type: string
+        required: true
+      release_prod:
+        type: string
+        required: true
+      release_dev:
+        type: string
+        required: true
+
+      # Image
+      image_repository:
+        type: string
+        required: true
+      image_tag:
+        type: string
+        required: true
+
+      # Smoke test
+      health_prod:
+        type: string
+        required: true
+      health_dev:
+        type: string
+        required: true
+
+      # Secret name (DB/Redis)
+      k8s_secret_name:
+        type: string
+        default: service-secrets
+
+    secrets:
+      KUBECONFIG_B64:
+        required: true
+
+      DB_PASSWORD_PROD:
+        required: true
+      REDIS_PASSWORD_PROD:
+        required: true
+      DB_PASSWORD_DEV:
+        required: true
+      REDIS_PASSWORD_DEV:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == inputs.prod_branch && 'production' || 'development' }}
+    steps:
+      - name: Checkout infrastructure repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.infra_repo }}
+          ref: ${{ inputs.infra_ref }}
+          path: infra
+
+      - name: Decide environment (ns/release/values/health)
+        id: meta
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "${{ inputs.prod_branch }}" ]; then
+            echo "ns=${{ inputs.namespace_prod }}" >> $GITHUB_OUTPUT
+            echo "release=${{ inputs.release_prod }}" >> $GITHUB_OUTPUT
+            echo "values=${{ inputs.values_prod }}" >> $GITHUB_OUTPUT
+            echo "health=${{ inputs.health_prod }}" >> $GITHUB_OUTPUT
+          else
+            echo "ns=${{ inputs.namespace_dev }}" >> $GITHUB_OUTPUT
+            echo "release=${{ inputs.release_dev }}" >> $GITHUB_OUTPUT
+            echo "values=${{ inputs.values_dev }}" >> $GITHUB_OUTPUT
+            echo "health=${{ inputs.health_dev }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.4
+
+      - name: Configure kubeconfig
+        shell: bash
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl cluster-info
+
+      - name: Apply Kubernetes Secret (DB/Redis)
+        shell: bash
+        run: |
+          NS="${{ steps.meta.outputs.ns }}"
+
+          if [ "${GITHUB_REF_NAME}" = "${{ inputs.prod_branch }}" ]; then
+            DB_PASSWORD="${{ secrets.DB_PASSWORD_PROD }}"
+            REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_PROD }}"
+          else
+            DB_PASSWORD="${{ secrets.DB_PASSWORD_DEV }}"
+            REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_DEV }}"
+          fi
+
+          kubectl -n "$NS" create secret generic "${{ inputs.k8s_secret_name }}" \
+            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
+            --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Helm upgrade --install
+        shell: bash
+        run: |
+          helm upgrade --install "${{ steps.meta.outputs.release }}" "infra/${{ inputs.helm_chart_path }}" \
+            -n "${{ steps.meta.outputs.ns }}" --create-namespace \
+            -f "infra/${{ steps.meta.outputs.values }}" \
+            --set images.app.repository="${{ inputs.image_repository }}" \
+            --set images.app.tag="${{ inputs.image_tag }}" \
+            --set env.IMAGE_SHA="${{ inputs.image_tag }}" \
+            --atomic --wait --timeout 10m
+
+      - name: Rollout status
+        shell: bash
+        run: |
+          kubectl rollout status deploy/${{ steps.meta.outputs.release }} -n "${{ steps.meta.outputs.ns }}"
+
+      - name: Smoke test
+        shell: bash
+        run: |
+          curl -fsS --retry 10 --retry-connrefused --retry-delay 3 "${{ steps.meta.outputs.health }}"
