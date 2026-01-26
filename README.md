@@ -1,5 +1,20 @@
 # Infrastructure
 
+## Local development
+
+Start local development ```docker compose up```,
+lahko dodaš tudi ```-d``` flag.
+
+Databases will be created automatically from ```./mysql/init.sql```
+
+Run Laravel migrations with
+```docker compose exec php_users php artisan migrate```
+
+Access MySQL server ```docker compose exec db mysql -u root -prootpass```
+
+
+
+
 ## Azure Cluster setup
 
 ### Namespaces

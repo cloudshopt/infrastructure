@@ -1,41 +1,45 @@
 services:
-  php:
+  php_users:
     build:
       context: ../user-service
       dockerfile: ../user-service/Dockerfile
     volumes:
       - ../user-service/:/var/www/html
-      - laravel_storage:/var/www/html/storage
-      - laravel_cache:/var/www/html/bootstrap/cache
+      - ../user-service/:/srv/user-service
+      - users_storage:/var/www/html/storage
+      - users_cache:/var/www/html/bootstrap/cache
+
+  php_products:
+    build:
+      context: ../product-service
+      dockerfile: ../product-service/Dockerfile
+    volumes:
+      - ../product-service/:/var/www/html
+      - ../product-service/:/srv/product-service
+      - products_storage:/var/www/html/storage
+      - products_cache:/var/www/html/bootstrap/cache
 
   web:
     image: nginx:1.28.1
-    working_dir: /var/www/html
-    volumes:
-      - ../user-service:/var/www/html
-      - ./nginx/nginx_template_local.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "80:80"
+    volumes:
+      - ../user-service:/srv/user-service
+      - ../product-service:/srv/product-service
+      - ./nginx/nginx_template_local.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - php
-
-#  node:
-#    image: node:25
-#    user: "${UID}:${GID}"
-#    working_dir: /assets
-#    volumes:
-#      - ./:/assets
-#    command: npm run dev
+      - php_users
+      - php_products
 
   db:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: "rootpass"
-      MYSQL_DATABASE: "cloudshopt_users"
       MYSQL_USER: "cloudshoptuser"
-      MYSQL_PASSWORD: "cloudshoptpassword"
+      MYSQL_PASSWORD: "cloudshoptpass"
     volumes:
       - mysqldata:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   redis:
     image: redis:8
@@ -43,7 +47,9 @@ services:
       - redisdata:/data
 
 volumes:
-  laravel_storage:
-  laravel_cache:
+  users_storage:
+  users_cache:
+  products_storage:
+  products_cache:
   mysqldata:
   redisdata:
