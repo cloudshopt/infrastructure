@@ -227,6 +227,7 @@ jobs:
             -f "infra/${{ needs.meta.outputs.values }}" \
             --set images.app.repository="${{ inputs.image_repository }}" \
             --set images.app.tag="${{ needs.meta.outputs.tag }}" \
+            --set env.IMAGE_SHA="${{ needs.meta.outputs.tag }}" \
             --atomic --wait --timeout 10m
 
       - name: Rollout status

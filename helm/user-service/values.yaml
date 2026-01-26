@@ -75,6 +75,7 @@ env:
   DB_USERNAME: "users"
   REDIS_HOST: "cloudshopt-redis-master.cloudshopt.svc.cluster.local"
   REDIS_PORT: "6379"
+  IMAGE_SHA: "0.0.1"
 
 probes:
   readiness:
