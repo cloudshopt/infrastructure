@@ -45,14 +45,15 @@ service:
 ingress:
   enabled: true
   className: nginx
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # /api/users/<x> -> /api/<x>
+    nginx.ingress.kubernetes.io/rewrite-target: /api/$2
   hosts:
-    - host: users.timotejblazic.eu
+    - host: app.timotejblazic.eu
       paths:
-        - path: /
-          pathType: Prefix
+        - path: /api/users(/|$)(.*)
+          pathType: ImplementationSpecific
   tls: []
     # - secretName: chart-example-tls
     #   hosts:
