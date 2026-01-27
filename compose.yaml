@@ -29,36 +29,6 @@ services:
       - db
       - redis
 
-  php_orders:
-    build:
-      context: ../order-service
-      dockerfile: ../order-service/Dockerfile
-    volumes:
-      - ../order-service/:/var/www/html
-      - ../order-service/:/srv/order-service
-      - orders_storage:/var/www/html/storage
-      - orders_cache:/var/www/html/bootstrap/cache
-    expose:
-      - "9000"
-    depends_on:
-      - db
-      - redis
-
-  php_payments:
-    build:
-      context: ../payment-service
-      dockerfile: ../payment-service/Dockerfile
-    volumes:
-      - ../payment-service/:/var/www/html
-      - ../payment-service/:/srv/payment-service
-      - payments_storage:/var/www/html/storage
-      - payments_cache:/var/www/html/bootstrap/cache
-    expose:
-      - "9000"
-    depends_on:
-      - db
-      - redis
-
   frontend:
     image: node:20-alpine
     working_dir: /app
@@ -79,15 +49,11 @@ services:
     volumes:
       - ../user-service:/srv/user-service:ro
       - ../product-service:/srv/product-service:ro
-      - ../order-service:/srv/order-service:ro
-      - ../payment-service:/srv/payment-service:ro
       - ./nginx/nginx_template_local.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - frontend
       - php_users
       - php_products
-      - php_orders
-      - php_payments
 
   db:
     image: mysql:8
@@ -109,10 +75,6 @@ volumes:
   users_cache:
   products_storage:
   products_cache:
-  orders_storage:
-  orders_cache:
-  payments_storage:
-  payments_cache:
   frontend_node_modules:
   mysqldata:
   redisdata:
