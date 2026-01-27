@@ -46,6 +46,8 @@ ingress:
   enabled: true
   className: nginx
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
     # /api/users/<x> -> /api/<x>
     nginx.ingress.kubernetes.io/rewrite-target: /api/$2
@@ -54,10 +56,10 @@ ingress:
       paths:
         - path: /api/users(/|$)(.*)
           pathType: ImplementationSpecific
-  tls: []
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+  tls:
+    - hosts:
+        - app-dev.timotejblazic.eu
+      secretName: app-tls
 
 appCode:
   sourcePath: /var/www/html

@@ -29,16 +29,18 @@ service:
 ingress:
   enabled: true
   className: nginx
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: app.timotejblazic.eu
       paths:
         - path: /
           pathType: Prefix
-#  tls:
-#    - secretName: app-tls
-#      hosts:
-#        - app.timotejblazic.eu
+  tls:
+    - hosts:
+        - app.timotejblazic.eu
+      secretName: app-tls
 
 probes:
   readiness:
