@@ -56,6 +56,11 @@ on:
         type: string
         required: true
 
+      # Check if secrets should be created
+      apply_k8s_secret:
+        type: boolean
+        default: true
+
       # Secret name (DB/Redis)
       k8s_secret_name:
         type: string
@@ -66,13 +71,13 @@ on:
         required: true
 
       DB_PASSWORD_PROD:
-        required: true
+        required: false
       REDIS_PASSWORD_PROD:
-        required: true
+        required: false
       DB_PASSWORD_DEV:
-        required: true
+        required: false
       REDIS_PASSWORD_DEV:
-        required: true
+        required: false
 
 permissions:
   contents: read
@@ -124,6 +129,7 @@ jobs:
           kubectl cluster-info
 
       - name: Apply Kubernetes Secret (DB/Redis)
+        if: ${{ inputs.apply_k8s_secret && inputs.k8s_secret_name != '' }}
         shell: bash
         run: |
           NS="${{ steps.meta.outputs.ns }}"
