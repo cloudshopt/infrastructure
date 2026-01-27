@@ -35,8 +35,8 @@ spec:
 
       containers:
         - name: nginx
-          image: "{{ .Values.images.nginx.repository }}:{{ .Values.images.nginx.tag }}"
-          imagePullPolicy: {{ .Values.images.nginx.pullPolicy }}
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
 
           ports:
             - name: http
