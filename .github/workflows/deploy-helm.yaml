@@ -74,9 +74,13 @@ on:
         required: false
       REDIS_PASSWORD_PROD:
         required: false
+      JWT_SECRET_PROD:
+        required: false
       DB_PASSWORD_DEV:
         required: false
       REDIS_PASSWORD_DEV:
+        required: false
+      JWT_SECRET_DEV:
         required: false
 
 permissions:
@@ -137,14 +141,17 @@ jobs:
           if [ "${GITHUB_REF_NAME}" = "${{ inputs.prod_branch }}" ]; then
             DB_PASSWORD="${{ secrets.DB_PASSWORD_PROD }}"
             REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_PROD }}"
+            JWT_SECRET="${{ secrets.JWT_SECRET_PROD }}"
           else
             DB_PASSWORD="${{ secrets.DB_PASSWORD_DEV }}"
             REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_DEV }}"
+            JWT_SECRET="${{ secrets.JWT_SECRET_DEV }}"
           fi
 
           kubectl -n "$NS" create secret generic "${{ inputs.k8s_secret_name }}" \
             --from-literal=DB_PASSWORD="$DB_PASSWORD" \
             --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Helm upgrade --install

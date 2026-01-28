@@ -79,6 +79,9 @@ env:
   REDIS_HOST: "cloudshopt-redis-master.cloudshopt.svc.cluster.local"
   REDIS_PORT: "6379"
   IMAGE_SHA: "0.0.1"
+  JWT_TTL_SECONDS: "3600"
+  JWT_ISSUER: "cloudshopt-user-service"
+  JWT_AUDIENCE: "cloudshopt"
 
 probes:
   readiness:
