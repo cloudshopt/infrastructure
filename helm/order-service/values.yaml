@@ -68,6 +68,7 @@ appCode:
 existingSecretName: order-service-secrets
 
 env:
+  APP_NAME: "OrderService"
   APP_ENV: production
   APP_DEBUG: "false"
   APP_KEY: "base64:LcY4ll1kwDGK/708RaB+0uCk0BtKa+K7OypExGtIYTI="
@@ -79,6 +80,10 @@ env:
   REDIS_HOST: "cloudshopt-redis-master.cloudshopt.svc.cluster.local"
   REDIS_PORT: "6379"
   IMAGE_SHA: "0.0.1"
+  JWT_TTL_SECONDS: "3600"
+  JWT_ISSUER: "cloudshopt-user-service"
+  JWT_AUDIENCE: "cloudshopt"
+  PRODUCT_SERVICE_BASE_URL: "https://app.timotejblazic.eu/api/products"
 
 probes:
   readiness:

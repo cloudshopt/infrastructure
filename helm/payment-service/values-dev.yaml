@@ -68,6 +68,7 @@ appCode:
 existingSecretName: payment-service-secrets
 
 env:
+  APP_NAME: "PaymentService"
   APP_ENV: local
   APP_DEBUG: "true"
   APP_KEY: "base64:hZh8hHHPBmtccIKPnGKePjHRXwuLZr2EWXQ3xL2lNN8="

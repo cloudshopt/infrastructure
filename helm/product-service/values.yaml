@@ -68,6 +68,7 @@ appCode:
 existingSecretName: product-service-secrets
 
 env:
+  APP_NAME: "ProductService"
   APP_ENV: production
   APP_DEBUG: "false"
   APP_KEY: "base64:LcY4ll1kwDGK/708RaB+0uCk0BtKa+K7OypExGtIYTI="

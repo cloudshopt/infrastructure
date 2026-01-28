@@ -68,6 +68,7 @@ appCode:
 existingSecretName: user-service-secrets
 
 env:
+  APP_NAME: "UserService"
   APP_ENV: local
   APP_DEBUG: "true"
   APP_KEY: "base64:hZh8hHHPBmtccIKPnGKePjHRXwuLZr2EWXQ3xL2lNN8="
