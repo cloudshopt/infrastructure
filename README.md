@@ -1,64 +1,128 @@
-# Infrastructure
+# CloudShopt Infrastructure
 
-## Local development
+This repository contains Kubernetes/Helm infrastructure for the CloudShopt project.  
+It provides local development (Docker Compose) and production/development deployments via GitHub Actions.
 
-Start local development ```docker compose up```,
-lahko dodaš tudi ```-d``` flag.
+## Services
 
-Databases will be created automatically from ```./mysql/init.sql```
+- **frontend-service** (Vue + Vite)
+- **user-service** (Laravel) – auth (register/login/me), JWT
+- **product-service** (Laravel) – product list/detail
+- **order-service** (Laravel) – cart + orders
+- **payment-service** (Laravel) – Stripe Checkout Session + webhooks
+- Shared infrastructure: **ingress-nginx**, **MySQL**, **Redis**
 
-Run Laravel migrations with
-```docker compose exec php_users php artisan migrate```
+---
 
-Access MySQL server ```docker compose exec db mysql -u root -prootpass```
+## Local Development Setup
 
+### Prerequisites
+- Docker + Docker Compose
 
-
-
-## Azure Cluster setup
-
-### Namespaces
-- First create namespaces for Ingress controller and Cloudshopt microservices:
-```kubectl apply -f k8s/namespaces/```
-- Check: ```kubectl get ns```
-
-### Install ingress-nginx
-Install ingress-nginx with Helm into ```ingress-nginx``` namespace
+### Start local stack
 
 ```
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-
-helm repo update
-
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
--n ingress-nginx \
--f helm/ingress-nginx-values.yaml
+docker compose up -d
 ```
 
-Why custom values?
-https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/load-bal-ingress-c/create-unmanaged-ingress-controller?tabs=azure-cli
+### Local access
 
-### Install MySQL and Redis servers
+The local gateway runs on:
+- Frontend: http://app.localhost/
+- User API: http://app.localhost/api/users/
+- Product API: http://app.localhost/api/products/
+- Order API: http://app.localhost/api/orders/
+- Payment API: http://app.localhost/api/payments/
 
+### Useful health/diagnostics endpoints
+
+Each service exposes diagnostics endpoints:
+- ```GET /api/<service>/healthz```
+- ```GET /api/<service>/info```
+- ```GET /api/<service>/database```
+
+Examples:
+
+- ```http://app.localhost/api/products/healthz```
+- ```http://app.localhost/api/orders/info```
+- ```http://app.localhost/api/users/database```
+
+## Swagger / OpenAPI
+
+Each backend service provides an ```openapi.yaml``` used by Swagger UI.
+The specs are located in each service repository in ```/docs/openapi.yaml``` file.
+
+## Branching Strategy
+
+This project uses two branches per repository:
+- ```main``` (production)
+- ```dev``` (development)
+
+Workflow:
+1. Work on ```dev``` (features, fixes).
+2. Merge dev to main when ready for production release.
+3. CI/CD deploys automatically based on the pushed branch.
+
+## CI/CD Pipeline
+
+CI/CD is implemented using GitHub Actions.
+
+1. Build Docker image
+2. Push image to container registry (Docker Hub)
+3. Deploy Helm chart to AKS
+
+### Environment mapping
+- Push to ```dev``` deploys to dev namespace (cloudshopt-dev)
+- Push to main → deploy to prod namespace (cloudshopt)
+
+
+### Secrets
+
+Sensitive values are stored in GitHub Secrets and injected during deployment.
+
+## System Architecture
+
+CloudShopt is built using a microservices architecture:
+- **user-service** issues JWT tokens
+- **frontend-service** stores JWT and calls backend APIs via the gateway
+- **order-service** manages cart and order creation
+- **payment-service** creates Stripe Checkout Session and handles Stripe webhooks
+- **payment-service** updates order status through internal service-to-service calls
+- **product-service** provides product catalog endpoints
+
+### Request routing
+
+All external traffic goes through ingress-nginx and is routed by path prefix:
+
+- ```/```  frontend-service
+- ```/api/users```  user-service
+- ```/api/products``` product-service
+- ```/api/orders```  order-service
+- ```/api/payments```  payment-service
+
+## Public URLs
+
+Development: https://app-dev.timotejblazic.eu/
+
+Production: https://app.timotejblazic.eu/
+
+## Stripe Setup
+
+### Local development (Stripe CLI)
+
+Use Stripe CLI to forward webhooks to local gateway:
 ```
-helm upgrade --install cloudshopt-mysql oci://registry-1.docker.io/bitnamicharts/mysql \
--n cloudshopt \
--f helm/mysql-values.yaml \
--f helm/mysql-secrets.yaml
+stripe login
+stripe listen --forward-to http://app.localhost/api/payments/webhooks/stripe
 ```
 
-```
-helm upgrade --install cloudshopt-redis oci://registry-1.docker.io/bitnamicharts/redis \
--n cloudshopt \
--f helm/redis-values.yaml \
--f helm/redis-secrets.yaml
-```
+Stripe CLI prints a ```whsec_``` secret. Set it as: ```STRIPE_WEBHOOK_SECRET```
 
-## Dev vs main
-imamo dva namespace-a *cloudshopt* in *cloudshopt-dev*
+### Production / Kubernetes (Stripe Dashboard)
 
-dev:
-users-dev.timotejblazic.eu
+We have two webhook endpoints:
+- https://app-dev.timotejblazic.eu/api/payments/webhooks/stripe (dev)
 
-main (prod):
-users.timotejblazic.eu
+- https://app.timotejblazic.eu/api/payments/webhooks/stripe (prod)
+
+Copy the endpoint's ```whsec_``` into Kubernetes secrets (GitHub Secrets).
