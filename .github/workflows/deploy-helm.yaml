@@ -76,12 +76,26 @@ on:
         required: false
       JWT_SECRET_PROD:
         required: false
+      ORDER_SERVICE_KEY_PROD:
+        required: false
+      STRIPE_SECRET_KEY_PROD:
+        required: false
+      STRIPE_WEBHOOK_SECRET_PROD:
+        required: false
+
       DB_PASSWORD_DEV:
         required: false
       REDIS_PASSWORD_DEV:
         required: false
       JWT_SECRET_DEV:
         required: false
+      ORDER_SERVICE_KEY_DEV:
+        required: false
+      STRIPE_SECRET_KEY_DEV:
+        required: false
+      STRIPE_WEBHOOK_SECRET_DEV:
+        required: false
+
 
 permissions:
   contents: read
@@ -142,16 +156,25 @@ jobs:
             DB_PASSWORD="${{ secrets.DB_PASSWORD_PROD }}"
             REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_PROD }}"
             JWT_SECRET="${{ secrets.JWT_SECRET_PROD }}"
+            ORDER_SERVICE_KEY="${{ secrets.ORDER_SERVICE_KEY_PROD }}"
+            STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY_PROD }}"
+            STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET_PROD }}"
           else
             DB_PASSWORD="${{ secrets.DB_PASSWORD_DEV }}"
             REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD_DEV }}"
             JWT_SECRET="${{ secrets.JWT_SECRET_DEV }}"
+            ORDER_SERVICE_KEY="${{ secrets.ORDER_SERVICE_KEY_DEV }}"
+            STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY_DEV }}"
+            STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET_DEV }}"
           fi
 
           kubectl -n "$NS" create secret generic "${{ inputs.k8s_secret_name }}" \
             --from-literal=DB_PASSWORD="$DB_PASSWORD" \
             --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
             --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --from-literal=ORDER_SERVICE_KEY="$ORDER_SERVICE_KEY" \
+            --from-literal=STRIPE_SECRET_KEY="STRIPE_SECRET_KEY" \
+            --from-literal=STRIPE_WEBHOOK_SECRET="STRIPE_WEBHOOK_SECRET" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Helm upgrade --install

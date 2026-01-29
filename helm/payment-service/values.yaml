@@ -80,6 +80,9 @@ env:
   REDIS_HOST: "cloudshopt-redis-master.cloudshopt.svc.cluster.local"
   REDIS_PORT: "6379"
   IMAGE_SHA: "0.0.1"
+  ORDER_SERVICE_BASE_URL: "https://app.timotejblazic.eu/api/orders"
+  STRIPE_CURRENCY: "eur"
+  FRONTEND_BASE_URL: "https://app.timotejblazic.eu"
 
 probes:
   readiness:
