@@ -173,8 +173,8 @@ jobs:
             --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
             --from-literal=JWT_SECRET="$JWT_SECRET" \
             --from-literal=ORDER_SERVICE_KEY="$ORDER_SERVICE_KEY" \
-            --from-literal=STRIPE_SECRET_KEY="STRIPE_SECRET_KEY" \
-            --from-literal=STRIPE_WEBHOOK_SECRET="STRIPE_WEBHOOK_SECRET" \
+            --from-literal=STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
+            --from-literal=STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Helm upgrade --install
