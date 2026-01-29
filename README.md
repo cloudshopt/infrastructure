@@ -37,13 +37,11 @@ The local gateway runs on:
 ### Useful health/diagnostics endpoints
 
 Each service exposes diagnostics endpoints:
-- ```GET /api/<service>/healthz```
 - ```GET /api/<service>/info```
 - ```GET /api/<service>/database```
 
 Examples:
 
-- ```http://app.localhost/api/products/healthz```
 - ```http://app.localhost/api/orders/info```
 - ```http://app.localhost/api/users/database```
 
@@ -105,6 +103,17 @@ All external traffic goes through ingress-nginx and is routed by path prefix:
 Development: https://app-dev.timotejblazic.eu/
 
 Production: https://app.timotejblazic.eu/
+
+
+## Health check endpoint
+
+Each service exposes a simple health endpoint:
+
+- ```GET /healthz``` → returns **HTTP 200 OK** when the service is running
+
+This endpoint is used by Kubernetes **readiness** and **liveness** probes.
+
+
 
 ## Stripe Setup
 
