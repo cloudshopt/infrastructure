@@ -135,3 +135,7 @@ We have two webhook endpoints:
 - https://app.timotejblazic.eu/api/payments/webhooks/stripe (prod)
 
 Copy the endpoint's ```whsec_``` into Kubernetes secrets (GitHub Secrets).
+
+### Test payment information
+
+For testing payments use card number ```4242 4242 4242 4242```.
