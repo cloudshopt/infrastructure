@@ -130,8 +130,8 @@ affinity: {}
 metrics:
   enabled: true
   path: /metrics
-  interval: 15s
-  scrapeTimeout: 10s
+  interval: 120s
+  scrapeTimeout: 120s
   monitoringRelease: kps
 
   bearerToken:
