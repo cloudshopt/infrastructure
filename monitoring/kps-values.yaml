@@ -1,0 +1,8 @@
+prometheus:
+  prometheusSpec:
+    serviceMonitorNamespaceSelector: {}
+    podMonitorNamespaceSelector: {}
+    ruleNamespaceSelector: {}
+
+grafana:
+  enabled: true

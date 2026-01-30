@@ -3,3 +3,7 @@ controller:
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
     externalTrafficPolicy: Local
+  metrics:
+    enabled: true
+  serviceMonitor:
+    enabled: true

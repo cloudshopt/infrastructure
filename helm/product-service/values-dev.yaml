@@ -126,3 +126,16 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+metrics:
+  enabled: true
+  path: /metrics
+  interval: 15s
+  scrapeTimeout: 10s
+  monitoringRelease: kps
+
+  bearerToken:
+    enabled: false
+    secretName: service-secrets
+    secretKey: METRICS_BEARER_TOKEN
+
